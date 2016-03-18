@@ -85,9 +85,11 @@ httpskeyfile = cert/containerops/containerops.key
 filepath = log/containerops-log
 
 [db]
-uri = localhost:6379
-passwd = containerops
-db = 8
+driver = mysql
+uri = localhost:3306
+user = root
+passwd = 123456
+name = dockyard
 
 [dockyard]
 path = data
@@ -98,10 +100,10 @@ standalone = true
 driver = qiniu
 
 [qiniu]
-endpoint = xxx
-bucket = xxx
-accessKeyID = xxx
-accessKeysecret = xxx
+endpoint = sample.com
+bucket = dockyard
+accessKeyID = userid
+accessKeysecret = userkey
 ```
 
 * runmode: application run mode must be `dev` or `prod`.
@@ -109,9 +111,12 @@ accessKeysecret = xxx
 * httpscertfile: specify user own https certificate file by this parameter.
 * httpskeyfile: specify user own https key file by this parameter.
 * [log] filepath: specify where Dockyard logs are stored.
-* [db] uri: Dockyard database provider is `redis`,`IP` and `Port` would be specified before `redis` boots.
+* [db] driver: specify `mysql` or `redis` to store image context.
+* [db] uri: Dockyard database provider is `mysql` or `redis`,`IP` and `Port` would be specified before database boots.
+* [db] user: optionally,specify the user to login and access when `mysql` is used.
 * [db] passwd: specify the password to login and access db.
-* [db] db: specify db area number to use.
+* [db] name: optionally,specify db name when `mysql` is used.
+* [db] db: optionally,specify db partition number when `redis` is used.
 * [dockyard] path: specify where `Docker` and `Rocket` image files are stored.
 * [dockyard] domains: registry server name or IP.
 * [dockyard] registry: specify the version of Docker V1 protocol.

@@ -8,6 +8,7 @@ import (
 
 	"github.com/containerops/dockyard/backend"
 	"github.com/containerops/dockyard/middleware"
+	"github.com/containerops/dockyard/models"
 	"github.com/containerops/dockyard/oss"
 	"github.com/containerops/dockyard/router"
 	"github.com/containerops/wrench/db"
@@ -15,29 +16,32 @@ import (
 )
 
 func SetDockyardMacaron(m *macaron.Macaron) {
-	//Setting Database
-	if err := db.InitDB(setting.DBURI, setting.DBPasswd, setting.DBDB); err != nil {
-		fmt.Printf("Connect Database error %s", err.Error())
+	if err := db.RegisterDriver(setting.DBDriver); err != nil {
+		fmt.Printf("Register database driver error: %s\n", err.Error())
+	} else {
+		db.Drv.RegisterModel(new(models.Repository), new(models.Tag), new(models.Image))
+		err := db.Drv.InitDB(setting.DBDriver, setting.DBUser, setting.DBPasswd, setting.DBURI, setting.DBName, setting.DBDB)
+		if err != nil {
+			fmt.Printf("Connect database error: %s\n", err.Error())
+		}
 	}
 
-	if err := backend.InitBackend(); err != nil {
-		fmt.Printf("Init backend error %s", err.Error())
-	}
+	backend.InitBackend()
 
 	if err := middleware.Initfunc(); err != nil {
-		fmt.Printf("Init middleware error %s", err.Error())
+		fmt.Printf("Init middleware error: %s\n", err.Error())
 	}
 
 	//Setting Middleware
 	middleware.SetMiddlewares(m)
+
+	//Setting Router
+	router.SetRouters(m)
 
 	//Start Object Storage Service if sets in conf
 	if strings.EqualFold(setting.OssSwitch, "enable") {
 		ossobj := oss.Instance()
 		ossobj.StartOSS()
 	}
-
-	//Setting Router
-	router.SetRouters(m)
 
 }
